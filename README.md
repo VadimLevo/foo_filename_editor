@@ -2,7 +2,7 @@
 
 [English](#english) | [Русский](#русский)
 
-![File Name Editor](screenshot v1.1.png)
+![File Name Editor](screenshot%20v1.1.png)
 ---
 
 ## English
