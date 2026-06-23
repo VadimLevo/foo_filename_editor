@@ -2,7 +2,7 @@
 
 [English](#english) | [Русский](#русский)
 
-![File Name Editor](screenshot.png)
+![File Name Editor](screenshot v1.1.png)
 ---
 
 ## English
@@ -20,6 +20,15 @@ Advanced file renamer component for **foobar2000** media player. This plugin hel
 * **Robust Error Handling**: If a file cannot be renamed (e.g., if it is locked or currently playing), the plugin bypasses it without crashing and provides a detailed summary report of successful and failed files.
 * **Persistent Settings**: Remembers your custom single/VA templates, history list, checkboxes status, and even your preferred window column widths between sessions.
 
+
+### 🎵 M3U/M3U8 Playlist Generation (v1.1)
+The plugin now includes built-in support for generating playlist files automatically during the renaming process:
+* **Save M3U Checkbox**: Automatically creates a playlist file in the top-level directory of your processed files.
+* **Custom Naming Templates**: Use standard foobar2000 title formatting syntax (like `%album%` or `%artist% - %album%`) to dynamically name your playlist file.
+* **EXTINF Metadata**: Optional toggle to write standard `#EXTM3U` and `#EXTINF` headers containing track durations and formatted titles (`%artist% - %title%`).
+* **Smart Conflict Resolution & Overwrite Toggle**: Prevents accidental loss of data. If overwrite is disabled, the plugin safely creates incremented filenames like `Playlist (1).m3u`.
+* **UTF-8 Compatibility**: Playlists are written with a proper UTF-8 BOM, ensuring seamless support for non-ASCII characters, symbols, and ligatures.
+
 ---
 
 ## Русский
@@ -36,3 +45,12 @@ Advanced file renamer component for **foobar2000** media player. This plugin hel
 * **Бесшовная интеграция с плейлистами**: Автоматически заменяет старые пути файлов на новые во всех открытых плейлистах. Сразу же запускает фоновое чтение метаданных (Reload Info) — никаких «мертвых» ссылок и неопознанных треков.
 * **Надежная обработка ошибок**: Если файл заблокирован или проигрывается в данный момент, плагин аккуратно пропустит его, не прерывая работу, а в конце выдаст подробный отчет со списком успешных и проблемных файлов.
 * **Сохранение состояния**: Плагин намертво запоминает ваши шаблоны для Single/VA, историю ввода, состояние чекбоксов и даже ширину столбцов таблицы между запусками.
+
+
+### 🎵 Генерация плейлистов M3U/M3U8 (v1.1)
+В плагин добавлена встроенная поддержка автоматического создания файлов плейлистов прямо в процессе переименования:
+* **Чекбокс Save M3U**: Автоматически создает файл плейлиста в корневой папке обрабатываемых треков.
+* **Кастомные шаблоны имен**: Использование стандартного синтаксиса форматирования foobar2000 (например, `%album%` или `%artist% - %album%`) для динамического именования файла плейлиста.
+* **Метаданные EXTINF**: Опциональный переключатель для записи стандартных заголовков `#EXTM3U` и строк `#EXTINF`, содержащих длительность треков и отформатированные имена вида `%artist% - %title%`.
+* **Умное разрешение конфликтов и перезапись**: Предотвращает случайную потерю данных. Если перезапись отключена, плагин безопасно создает файлы с инкрементом в имени, например: `Playlist (1).m3u`.
+* **Совместимость с UTF-8**: Плейлисты записываются со строгим UTF-8 BOM, что гарантирует корректное отображение любых кириллических символов, лигатур и спецсимволов.
