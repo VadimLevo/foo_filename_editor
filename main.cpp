@@ -3,7 +3,7 @@
 // Обязательная декларация информации о плагине
 DECLARE_COMPONENT_VERSION(
     "File Name Editor",
-    "1.0",
+    "1.1",
     "Advanced file renamer with transliteration and case conversion.\n"
 );
 
