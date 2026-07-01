@@ -429,6 +429,7 @@ void CEditorDialog::OnRename(UINT uNotifyCode, int nID, CWindow wndCtl) {
         new_path << "\\" << final_name;
         if (ext.is_empty() == false) new_path << "." << ext;
 
+        // Если полный путь ВООБЩЕ не изменился (даже регистром), пропускаем
         if (old_path == new_path) {
             old_handles.add_item(m_items[i]);
             new_handles.add_item(m_items[i]);
@@ -436,7 +437,35 @@ void CEditorDialog::OnRename(UINT uNotifyCode, int nID, CWindow wndCtl) {
             continue;
         }
 
-        if (MoveFileW(pfc::stringcvt::string_os_from_utf8(old_path).get_ptr(), pfc::stringcvt::string_os_from_utf8(new_path).get_ptr()) != 0) {
+        CString wOld = pfc::stringcvt::string_os_from_utf8(old_path).get_ptr();
+        CString wNew = pfc::stringcvt::string_os_from_utf8(new_path).get_ptr();
+
+        bool move_success = false;
+
+        // --- УМНОЕ РЕШЕНИЕ ДЛЯ ИЗМЕНЕНИЯ РЕГИСТРА (CASE-ONLY RENAME) ---
+        if (wOld.CompareNoCase(wNew) == 0 && wOld.Compare(wNew) != 0) {
+            // Изменился только регистр букв. Делаем двухэтапный сдвиг через временный файл
+            pfc::string8 temp_path = new_path;
+            temp_path << ".__ren_tmp__";
+            CString wTmp = pfc::stringcvt::string_os_from_utf8(temp_path).get_ptr();
+
+            if (MoveFileW(wOld, wTmp) != 0) {
+                if (MoveFileW(wTmp, wNew) != 0) {
+                    move_success = true;
+                }
+                else {
+                    MoveFileW(wTmp, wOld); // Откат, если второй шаг сорвался
+                }
+            }
+        }
+        else {
+            // Обычное полноценное переименование файла
+            if (MoveFileW(wOld, wNew) != 0) {
+                move_success = true;
+            }
+        }
+
+        if (move_success == true) {
             successCount++;
             old_handles.add_item(m_items[i]);
             pfc::string8 proto_path = "file://"; proto_path << new_path;
@@ -547,7 +576,6 @@ void CEditorDialog::OnRename(UINT uNotifyCode, int nID, CWindow wndCtl) {
                     fprintf(f, "%s\r\n", pfc::stringcvt::string_utf8_from_os(wRel).get_ptr());
                 }
                 fclose(f);
-                // Убрано сообщение об успешном сохранении плейлиста для "тихого" режима
             }
             else {
                 wchar_t errBuf[512];
@@ -558,7 +586,6 @@ void CEditorDialog::OnRename(UINT uNotifyCode, int nID, CWindow wndCtl) {
     }
 
     CString msg;
-    // Окно появляется ТОЛЬКО если были файлы, которые не удалось обработать
     if (failedFiles.empty() == false) {
         msg.Format(_T("Successfully processed: %d files.\n\nFailed: %zu files:\n"), successCount, failedFiles.size());
         size_t displayCount = failedFiles.size() > 10 ? 10 : failedFiles.size();
