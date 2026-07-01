@@ -29,6 +29,9 @@ The plugin now includes built-in support for generating playlist files automatic
 * **Smart Conflict Resolution & Overwrite Toggle**: Prevents accidental loss of data. If overwrite is disabled, the plugin safely creates incremented filenames like `Playlist (1).m3u`.
 * **UTF-8 Compatibility**: Playlists are written with a proper UTF-8 BOM, ensuring seamless support for non-ASCII characters, symbols, and ligatures.
 
+### 🔧 Patch v1.1.1
+* **Case-only Renaming Fix:** Resolved an issue where changing only the capitalization of a filename (e.g., from `TRACK.flac` to `Track.flac`) would be ignored or fail on Windows/NTFS filesystems due to their case-preserving but case-insensitive nature. The plugin now uses a safe two-step transit renaming process to handle these specific cases smoothly.
+
 ---
 
 ## Русский
@@ -54,3 +57,6 @@ The plugin now includes built-in support for generating playlist files automatic
 * **Метаданные EXTINF**: Опциональный переключатель для записи стандартных заголовков `#EXTM3U` и строк `#EXTINF`, содержащих длительность треков и отформатированные имена вида `%artist% - %title%`.
 * **Умное разрешение конфликтов и перезапись**: Предотвращает случайную потерю данных. Если перезапись отключена, плагин безопасно создает файлы с инкрементом в имени, например: `Playlist (1).m3u`.
 * **Совместимость с UTF-8**: Плейлисты записываются со строгим UTF-8 BOM, что гарантирует корректное отображение любых кириллических символов, лигатур и спецсимволов.
+
+### 🔧 Патч v1.1.1
+* **Исправление работы с регистром:** Решена проблема, из-за которой изменение только регистра букв в имени файла (например, с `TRACK.flac` на `Track.flac`) игнорировалось операционной системой Windows (NTFS). Теперь плагин автоматически распознает такие ситуации и использует безопасное двухэтапное переименование через временный файл, гарантируя точное применение выбранной капитализации.
