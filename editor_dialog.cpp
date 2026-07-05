@@ -391,9 +391,15 @@ void CEditorDialog::OnRename(UINT uNotifyCode, int nID, CWindow wndCtl) {
     for (t_size i = 0; i < m_items.get_count(); ++i) {
         pfc::string8 old_path_raw;
         filesystem::g_get_display_path(m_items[i]->get_path(), old_path_raw);
-        if (strncmp(old_path_raw.get_ptr(), "file://", 7) == 0) old_path_raw = old_path_raw.get_ptr() + 7;
+        if (strncmp(old_path_raw.get_ptr(), "file://", 7) == 0) {
+            old_path_raw = old_path_raw.get_ptr() + 7;
+        }
 
-        pfc::string8 old_path = old_path_raw;
+        // НОРМАЛИЗАЦИЯ СЛЭШЕЙ: Заменяем все прямые слэши на обратные для безопасной работы с Windows API
+        CString wOldPath = pfc::stringcvt::string_os_from_utf8(old_path_raw).get_ptr();
+        wOldPath.Replace(L'/', L'\\');
+        pfc::string8 old_path = pfc::stringcvt::string_utf8_from_os(wOldPath).get_ptr();
+
         pfc::string8 directory = pfc::string_directory(old_path);
         pfc::string8 ext = pfc::string_extension(old_path);
 
@@ -429,27 +435,34 @@ void CEditorDialog::OnRename(UINT uNotifyCode, int nID, CWindow wndCtl) {
         new_path << "\\" << final_name;
         if (ext.is_empty() == false) new_path << "." << ext;
 
-        // Если полный путь ВООБЩЕ не изменился (даже регистром), пропускаем
-        if (old_path == new_path) {
+        CString wOld = pfc::stringcvt::string_os_from_utf8(old_path).get_ptr();
+        CString wNew = pfc::stringcvt::string_os_from_utf8(new_path).get_ptr();
+
+        // Достаем реальное имя файла прямо с жесткого диска, чтобы не верить кэшу foobar2000
+        WIN32_FIND_DATAW fd;
+        HANDLE hFind = FindFirstFileW(wOld, &fd);
+        CString wRealDiskName = (hFind != INVALID_HANDLE_VALUE) ? fd.cFileName : pfc::stringcvt::string_os_from_utf8(pfc::string_filename_ext(old_path)).get_ptr();
+        if (hFind != INVALID_HANDLE_VALUE) FindClose(hFind);
+
+        CString wNewFileName = pfc::stringcvt::string_os_from_utf8(pfc::string_filename_ext(new_path)).get_ptr();
+
+        // Пропускаем файл ТОЛЬКО если старый путь из базы foobar совпадает с новым,
+        // И реальное имя на диске тоже УЖЕ идеально совпадает с нужным (с учетом регистра).
+        if (wOld == wNew && wRealDiskName.Compare(wNewFileName) == 0) {
             old_handles.add_item(m_items[i]);
             new_handles.add_item(m_items[i]);
             successCount++;
             continue;
         }
 
-        CString wOld = pfc::stringcvt::string_os_from_utf8(old_path).get_ptr();
-        CString wNew = pfc::stringcvt::string_os_from_utf8(new_path).get_ptr();
-
         bool move_success = false;
 
-        // --- УМНОЕ РЕШЕНИЕ ДЛЯ ИЗМЕНЕНИЯ РЕГИСТРА (CASE-ONLY RENAME) ---
-        if (wOld.CompareNoCase(wNew) == 0 && wOld.Compare(wNew) != 0) {
-            // Изменился только регистр букв. Делаем двухэтапный сдвиг через временный файл
-            pfc::string8 temp_path = new_path;
-            temp_path << ".__ren_tmp__";
-            CString wTmp = pfc::stringcvt::string_os_from_utf8(temp_path).get_ptr();
-
+        // Если имена отличаются только регистром (или foobar думает, что они одинаковые, но на диске старый регистр)
+        if (wOld.CompareNoCase(wNew) == 0) {
+            CString wTmp = wNew + L".__ren_tmp__";
+            // Шаг 1: переименовываем физический файл во временное имя
             if (MoveFileW(wOld, wTmp) != 0) {
+                // Шаг 2: переименовываем временный файл в финальное имя с нужным регистром
                 if (MoveFileW(wTmp, wNew) != 0) {
                     move_success = true;
                 }
@@ -459,7 +472,7 @@ void CEditorDialog::OnRename(UINT uNotifyCode, int nID, CWindow wndCtl) {
             }
         }
         else {
-            // Обычное полноценное переименование файла
+            // Обычное полноценное переименование
             if (MoveFileW(wOld, wNew) != 0) {
                 move_success = true;
             }
@@ -508,12 +521,21 @@ void CEditorDialog::OnRename(UINT uNotifyCode, int nID, CWindow wndCtl) {
             filesystem::g_get_display_path(new_handles[0]->get_path(), first_path_utf8);
             if (strncmp(first_path_utf8.get_ptr(), "file://", 7) == 0) first_path_utf8 = first_path_utf8.get_ptr() + 7;
 
+            // Нормализация слэшей для правильного поиска общей директории
+            CString wFirstPath = pfc::stringcvt::string_os_from_utf8(first_path_utf8).get_ptr();
+            wFirstPath.Replace(L'/', L'\\');
+            first_path_utf8 = pfc::stringcvt::string_utf8_from_os(wFirstPath).get_ptr();
+
             CString wCommon = pfc::stringcvt::string_os_from_utf8(pfc::string_directory(first_path_utf8)).get_ptr();
 
             for (t_size i = 1; i < new_handles.get_count(); ++i) {
                 pfc::string8 item_path_utf8;
                 filesystem::g_get_display_path(new_handles[i]->get_path(), item_path_utf8);
                 if (strncmp(item_path_utf8.get_ptr(), "file://", 7) == 0) item_path_utf8 = item_path_utf8.get_ptr() + 7;
+
+                CString wItemPath = pfc::stringcvt::string_os_from_utf8(item_path_utf8).get_ptr();
+                wItemPath.Replace(L'/', L'\\');
+                item_path_utf8 = pfc::stringcvt::string_utf8_from_os(wItemPath).get_ptr();
 
                 CString wDir = pfc::stringcvt::string_os_from_utf8(pfc::string_directory(item_path_utf8)).get_ptr();
                 while (wCommon.IsEmpty() == false && wDir.Left(wCommon.GetLength()).CompareNoCase(wCommon) != 0) {
@@ -570,6 +592,7 @@ void CEditorDialog::OnRename(UINT uNotifyCode, int nID, CWindow wndCtl) {
                     if (strncmp(final_item_path.get_ptr(), "file://", 7) == 0) final_item_path = final_item_path.get_ptr() + 7;
 
                     CString wFull = pfc::stringcvt::string_os_from_utf8(final_item_path).get_ptr();
+                    wFull.Replace(L'/', L'\\');
                     CString wRel = wFull.Mid(wCommon.GetLength());
                     if (wRel.GetLength() > 0 && wRel[0] == L'\\') wRel = wRel.Mid(1);
 
@@ -623,11 +646,18 @@ void CEditorDialog::UpdatePreview() {
     for (t_size i = 0; i < m_items.get_count(); ++i) {
         pfc::string8 full_path_raw;
         filesystem::g_get_display_path(m_items[i]->get_path(), full_path_raw);
-        if (strncmp(full_path_raw.get_ptr(), "file://", 7) == 0) full_path_raw = full_path_raw.get_ptr() + 7;
+        if (strncmp(full_path_raw.get_ptr(), "file://", 7) == 0) {
+            full_path_raw = full_path_raw.get_ptr() + 7;
+        }
 
-        pfc::string8 directory = pfc::string_directory(full_path_raw);
-        pfc::string8 ext = pfc::string_extension(full_path_raw);
-        pfc::string8 new_name = useTags ? pfc::string8("") : pfc::string_filename(full_path_raw);
+        // НОРМАЛИЗАЦИЯ СЛЭШЕЙ для корректной генерации пути
+        CString wFullPath = pfc::stringcvt::string_os_from_utf8(full_path_raw).get_ptr();
+        wFullPath.Replace(L'/', L'\\');
+        pfc::string8 full_path = pfc::stringcvt::string_utf8_from_os(wFullPath).get_ptr();
+
+        pfc::string8 directory = pfc::string_directory(full_path);
+        pfc::string8 ext = pfc::string_extension(full_path);
+        pfc::string8 new_name = useTags ? pfc::string8("") : pfc::string_filename(full_path);
 
         for (auto& processor : pipeline) processor->Process(new_name, m_items[i]);
 

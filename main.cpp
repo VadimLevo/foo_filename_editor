@@ -3,7 +3,7 @@
 // Обязательная декларация информации о плагине
 DECLARE_COMPONENT_VERSION(
     "File Name Editor",
-    "1.1.1",
+    "1.1.2",
     "Advanced file renamer with transliteration and case conversion and automated M3U playlist generation.\n"
     "GitHub: https://github.com/VadimLevo/foo_filename_editor"
 );
