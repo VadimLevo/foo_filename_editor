@@ -16,15 +16,19 @@ public:
     metadb_handle_list m_items;
 
     CContainedWindow m_edit;
-    CContainedWindow m_edit_m3u; // Для поля ввода M3U
+    CContainedWindow m_edit_m3u;
     DWORD m_dwLastSel;
-    DWORD m_dwLastSelM3U; // Для курсора M3U
+    DWORD m_dwLastSelM3U;
 
-    CEditorDialog(metadb_handle_list_cref items) : m_items(items), m_edit(this, 1), m_edit_m3u(this, 2), m_dwLastSel(0), m_dwLastSelM3U(0) {}
+    CEditorDialog(metadb_handle_list_cref items)
+        : m_items(items), m_edit(this, 1), m_edit_m3u(this, 2),
+        m_dwLastSel(0), m_dwLastSelM3U(0) {
+    }
 
     BEGIN_MSG_MAP_EX(CEditorDialog)
         MSG_WM_INITDIALOG(OnInitDialog)
         MSG_WM_DESTROY(OnDestroy)
+        MSG_WM_CLOSE(OnClose)  // [FIX] обработка крестика
 
         COMMAND_ID_HANDLER_EX(IDOK, OnRename)
         COMMAND_ID_HANDLER_EX(IDCANCEL, OnCancel)
@@ -45,7 +49,6 @@ public:
         COMMAND_ID_HANDLER_EX(IDC_BTN_SET_VA, OnPresetVA)
         COMMAND_ID_HANDLER_EX(IDC_BTN_SET_CASE_DEF, OnSetCaseDefault)
 
-        // НОВЫЕ ПЕРЕХВАТЧИКИ ДЛЯ M3U
         COMMAND_ID_HANDLER_EX(IDC_CHK_SAVE_M3U, OnConfigChanged)
         COMMAND_ID_HANDLER_EX(IDC_CHK_M3U_EXTINF, OnConfigChanged)
         COMMAND_ID_HANDLER_EX(IDC_CHK_M3U_OVERWRITE, OnConfigChanged)
@@ -63,6 +66,7 @@ public:
 
     BOOL OnInitDialog(CWindow wndFocus, LPARAM lInitParam);
     void OnDestroy();
+    void OnClose();  // [NEW]
     void OnRename(UINT uNotifyCode, int nID, CWindow wndCtl);
     void OnCancel(UINT uNotifyCode, int nID, CWindow wndCtl);
     void OnConfigChanged(UINT uNotifyCode, int nID, CWindow wndCtl);
@@ -75,7 +79,6 @@ public:
     void OnPresetVA(UINT uNotifyCode, int nID, CWindow wndCtl);
     void OnSetCaseDefault(UINT uNotifyCode, int nID, CWindow wndCtl);
 
-    // НОВЫЕ ФУНКЦИИ ДЛЯ M3U
     void OnM3UPatternSelect(UINT uNotifyCode, int nID, CWindow wndCtl);
     void OnM3UTagMenu(UINT uNotifyCode, int nID, CWindow wndCtl);
     void OnSaveM3UPattern(UINT uNotifyCode, int nID, CWindow wndCtl);

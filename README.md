@@ -35,6 +35,10 @@ The plugin now includes built-in support for generating playlist files automatic
 ### 🔧 Patch v1.1.2
 * **Filesystem Sync & Case-only Rename Fix:** Completely resolved an issue where the plugin relied on foobar2000's cached paths. The plugin now aggressively normalizes directory slashes and checks the actual physical filenames on the NTFS drive. This guarantees that case-only renaming (e.g., `TRACK.flac` -> `Track.flac`) applies perfectly every time, bypassing any internal player cache.
 
+### 🔧 v1.2.1
+* **Fixed transliteration of diacritical characters (é, ö, ü, etc.).
+* **Improved renaming stability: safer filename sanitization and a more informative "Status" column.
+
 ---
 
 ## Русский
@@ -66,3 +70,7 @@ The plugin now includes built-in support for generating playlist files automatic
 
 ### 🔧 Патч v1.1.2
 * **Синхронизация с файловой системой:** Полностью решена проблема, при которой плагин доверял закэшированным путям foobar2000. Теперь происходит жесткая нормализация слэшей и проверка реальных физических имен файлов на жестком диске (NTFS). Это гарантирует стопроцентное срабатывание при изменении только регистра букв (например, `TRACK.flac` -> `Track.flac`), обходя внутренний кэш плеера.
+
+### 🔧 v1.2.1
+* **Улучшена транслитерация: корректно обрабатываются диакритические знаки (é→e, ö→o, ü→u и т.д.).
+* **Повышена стабильность переименования: защита от зарезервированных имён Windows и недопустимых символов; в колонке «Status» теперь показывается результат (OK / Unchanged / Case change).

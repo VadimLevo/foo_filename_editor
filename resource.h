@@ -24,7 +24,7 @@
 #define IDC_CMB_CASE_MODE           1008
 #define IDC_BTN_SET_CASE_DEF        1014
 
-// 4. Save M3U (อฮยÛษ มหฮส)
+// 4. Save M3U
 #define IDC_CHK_SAVE_M3U            1015
 #define IDC_CMB_M3U_TEMPLATE        1016
 #define IDC_BTN_M3U_TAGS            1017
