@@ -39,6 +39,9 @@ The plugin now includes built-in support for generating playlist files automatic
 * **Fixed transliteration of diacritical characters (é, ö, ü, etc.).
 * **Improved renaming stability: safer filename sanitization and a more informative "Status" column.
 
+### 🔧 Patch v1.2.2
+* **Fixed transliteration:** Preserved Cyrillic letters ё and й from being converted/stripped.
+
 ---
 
 ## Русский
@@ -74,3 +77,6 @@ The plugin now includes built-in support for generating playlist files automatic
 ### 🔧 v1.2.1
 * **Улучшена транслитерация: корректно обрабатываются диакритические знаки (é→e, ö→o, ü→u и т.д.).
 * **Повышена стабильность переименования: защита от зарезервированных имён Windows и недопустимых символов; в колонке «Status» теперь показывается результат (OK / Unchanged / Case change).
+
+### 🔧 Патч v1.2.2
+* **Исправлена транслитерация:** отменена обработка русских ё, й.

@@ -79,10 +79,15 @@ void TransliteratorProcessor::Process(pfc::string_base& text, const metadb_handl
     cleaned.reserve(decomposed.length());
 
     for (wchar_t ch : decomposed) {
-        // Пропускаем combining diacritical marks
-        if (ch >= 0x0300 && ch <= 0x036F) continue;
+        // [ИСПРАВЛЕНИЕ] Не вырезаем 0x0306 (Combining Breve для й/Й)
+        // и 0x0308 (Combining Diaeresis для ё/Ё)
+        if (ch >= 0x0300 && ch <= 0x036F) {
+            if (ch == 0x0306 || ch == 0x0308) {  // чтобы оставить й и исправить ё: if (ch == 0x0306) {
+                cleaned += ch;
+            }
+            continue;
+        }
 
-        // Управляющие/непечатаемые — заменяем на replacement или пропускаем
         if (ch < 0x20) continue;
 
         wchar_t res = HandleSpecialLatinChar(ch, cleaned);
@@ -91,22 +96,23 @@ void TransliteratorProcessor::Process(pfc::string_base& text, const metadb_handl
         }
     }
 
-    // [FIX] Используем m_replacement для оставшихся "экзотических" символов,
-    // если он задан
+    // Собираем обратно (и + 0x0306 -> й, И + 0x0306 -> Й)
+    int precomposedSize = FoldStringW(MAP_PRECOMPOSED, cleaned.c_str(),
+        static_cast<int>(cleaned.length()), nullptr, 0);
+    if (precomposedSize > 0) {
+        std::wstring recomposed(precomposedSize, L'\0');
+        FoldStringW(MAP_PRECOMPOSED, cleaned.c_str(),
+            static_cast<int>(cleaned.length()), &recomposed[0], precomposedSize);
+        cleaned = recomposed;
+    }
+
+    // Замена неизвестных символов (если задано)
     if (!m_replacement.is_empty()) {
         std::wstring repl;
         int rlen = MultiByteToWideChar(CP_UTF8, 0, m_replacement.get_ptr(), -1, nullptr, 0);
         if (rlen > 1) {
             repl.resize(rlen - 1);
             MultiByteToWideChar(CP_UTF8, 0, m_replacement.get_ptr(), -1, &repl[0], rlen);
-        }
-        for (auto& c : cleaned) {
-            // Оставляем только ASCII
-            if (c > 0x7F) {
-                // Заменяем весь "хвост" — упрощённо
-                // (в реальности тут нужна аккуратная замена посимвольно,
-                //  но оставим как есть для совместимости)
-            }
         }
     }
 
