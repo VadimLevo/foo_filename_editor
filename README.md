@@ -42,6 +42,9 @@ The plugin now includes built-in support for generating playlist files automatic
 ### 🔧 Patch v1.2.2
 * **Fixed transliteration:** Preserved Cyrillic letters ё and й from being converted/stripped.
 
+### 🔧 Patch v1.2.3
+* **Fixed transliteration diacritics:** Preserved Cyrillic letter **й** / **Й** while correctly stripping/normalizing Western Latin diacritics (e.g., **ä** → **a**) and Cyrillic **ё** → **е**.
+
 ---
 
 ## Русский
@@ -80,3 +83,6 @@ The plugin now includes built-in support for generating playlist files automatic
 
 ### 🔧 Патч v1.2.2
 * **Исправлена транслитерация:** отменена обработка русских ё, й.
+
+### 🔧 Патч v1.2.3
+* **Исправлена обработка диакритики при транслитерации:** Сохранена русская буква **й** / **Й**, при этом исправлена очистка латинских символов с диакритикой (например, **ä** → **a**) и русской **ё** → **е**.

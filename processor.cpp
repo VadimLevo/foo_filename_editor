@@ -82,7 +82,7 @@ void TransliteratorProcessor::Process(pfc::string_base& text, const metadb_handl
         // [ИСПРАВЛЕНИЕ] Не вырезаем 0x0306 (Combining Breve для й/Й)
         // и 0x0308 (Combining Diaeresis для ё/Ё)
         if (ch >= 0x0300 && ch <= 0x036F) {
-            if (ch == 0x0306 || ch == 0x0308) {  // чтобы оставить й и исправить ё: if (ch == 0x0306) {
+            if (ch == 0x0306) {  
                 cleaned += ch;
             }
             continue;
